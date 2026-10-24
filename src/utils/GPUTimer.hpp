@@ -33,7 +33,7 @@ public:
     inline i64 getTime() const { return time; }
 
 private:
-    i64 time;
+    i64 time = 0;
     const char* name;
-    u32 queryObject;
+    u32 queryObject = 0;
 };
