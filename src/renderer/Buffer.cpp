@@ -27,7 +27,15 @@ void Buffer::read(void* data, usize size, usize offset) {
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previouslyBoundBuffer);
 
     glBindBuffer(GL_ARRAY_BUFFER, id);
+#if defined(GL_ES_VERSION_3_0) || defined(__ANDROID__)
+    void* mapped = glMapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT);
+    if (mapped) {
+        std::memcpy(data, mapped, size);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+    }
+#else
     glGetBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+#endif
 
     glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
 }

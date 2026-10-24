@@ -11,7 +11,7 @@ DifferenceMode::~DifferenceMode() {
 }
 
 void DifferenceMode::drawSceneHook() {
-    auto currentSize = CCDirector::get()->getOpenGLView()->getWindowedSize();
+    auto currentSize = CCDirector::get()->getWinSize();
 
     if (lastSize != currentSize) {
         prepare(currentSize.width, currentSize.height);

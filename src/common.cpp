@@ -15,7 +15,12 @@ using ProcGlObjectLabel = void(*)(GLenum, GLuint, GLsizei, const char*);
 ProcGlObjectLabel glObjectLabelProc = nullptr;
 
 void glObjectLabel(GLenum id, GLuint name, GLsizei length, const char* label) {
-    #ifdef GEODE_WINDOWS
+    (void)id;
+    (void)name;
+    (void)length;
+    (void)label;
+
+    #if defined(GEODE_WINDOWS)
     if (!glObjectLabelProc)
         glObjectLabelProc = (ProcGlObjectLabel)wglGetProcAddress("glObjectLabel");
     if (glObjectLabelProc)

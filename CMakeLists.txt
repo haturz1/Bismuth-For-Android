@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "iOS" OR IOS)
     set(CMAKE_OSX_ARCHITECTURES "arm64")
@@ -35,9 +35,9 @@ set(ENABLE_GLSLANG_BINARIES OFF)
 
 include(FetchContent)
 FetchContent_Declare(
-	glm
-	GIT_REPOSITORY	https://github.com/g-truc/glm.git
-	GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 0af55ccecd98d4e5a8d1fad7de25ba429d60e863
 )
 FetchContent_Declare(glslang GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git GIT_TAG vulkan-sdk-1.4.335)
 FetchContent_MakeAvailable(glm glslang)
