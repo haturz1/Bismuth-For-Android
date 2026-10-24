@@ -1,5 +1,7 @@
 #include "Buffer.hpp"
 
+#include <cstring>
+
 using namespace geode::prelude;
 
 Buffer::~Buffer() {
@@ -27,7 +29,19 @@ void Buffer::read(void* data, usize size, usize offset) {
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previouslyBoundBuffer);
 
     glBindBuffer(GL_ARRAY_BUFFER, id);
+
+#if defined(__ANDROID__)
+    auto* mapped = static_cast<u8*>(glMapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT));
+    if (!mapped) {
+        glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
+        assert(false && "glMapBufferRange failed for Buffer::read");
+        return;
+    }
+    std::memcpy(data, mapped, size);
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+#else
     glGetBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+#endif
 
     glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
 }
