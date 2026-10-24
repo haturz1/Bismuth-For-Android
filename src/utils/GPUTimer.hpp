@@ -3,6 +3,18 @@
 #include <common.hpp>
 #include <profiler.hpp>
 
+#if defined(__ANDROID__) || defined(GL_ES_VERSION_3_0)
+static inline void getQueryResult64(GLuint id, GLint64* out) {
+    GLuint64 result = 0;
+    glGetQueryObjectui64v(id, GL_QUERY_RESULT, &result);
+    *out = static_cast<GLint64>(result);
+}
+#else
+static inline void getQueryResult64(GLuint id, GLint64* out) {
+    glGetQueryObjecti64v(id, GL_QUERY_RESULT, out);
+}
+#endif
+
 class GPUTimer {
 public:
     inline GPUTimer(const char* name)
@@ -25,7 +37,7 @@ public:
     inline void stop() {
         if (profiler::isTakingSnapshot) {
             glEndQuery(GL_TIME_ELAPSED);
-            glGetQueryObjecti64v(queryObject, GL_QUERY_RESULT, &time);
+            getQueryResult64(queryObject, &time);
         }
     }
 
