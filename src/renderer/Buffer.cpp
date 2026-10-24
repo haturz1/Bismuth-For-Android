@@ -3,75 +3,20 @@
 using namespace geode::prelude;
 
 Buffer::~Buffer() {
-    glDeleteBuffers(1, &id);
-    if (mappedData)
-        delete[] mappedData;
-}
-
-void Buffer::read(void* data, usize size, usize offset) {
-    assert(data != nullptr);
-    assert((offset + size) <= this->size);
-
-    i32 previouslyBoundBuffer;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previouslyBoundBuffer);
-
-    glBindBuffer(GL_ARRAY_BUFFER, id);
-    glGetBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-
-    glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
-}
-
-void Buffer::write(void* data, usize size, usize offset) {
-    assert(data != nullptr);
-    assert((offset + size) <= this->size);
-
-    i32 previouslyBoundBuffer;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previouslyBoundBuffer);
-
-    glBindBuffer(GL_ARRAY_BUFFER, id);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-
-    glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
-}
-
-void* Buffer::map(i32 type) {
-    if (mappedData) return nullptr;
-
-    if (shouldMap) {
-        bindAs(GL_ARRAY_BUFFER);
-        mappedData = (u8*)glMapBuffer(GL_ARRAY_BUFFER, type);
-    } else {
-        mappedData = new u8[size];
+    if (mappedData) {
+        if (shouldMap) {
+            bindAs(GL_ARRAY_BUFFER);
+            glUnmapBuffer(GL_ARRAY_BUFFER);
+        } else {
+            delete[] mappedData;
+        }
+        mappedData = nullptr;
     }
-    return mappedData;
-}
 
-void Buffer::unmap() {
-    if (!mappedData) return;
-
-    if (shouldMap) {
-        bindAs(GL_ARRAY_BUFFER);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-    } else {
-        delete[] mappedData;
+    if (id) {
+        glDeleteBuffers(1, &id);
+        id = 0;
     }
-    mappedData = nullptr;
-}
-
-void Buffer::flush(usize offset, usize size) {
-    if (!mappedData) return;
-
-    if (shouldMap) {
-        bindAs(GL_ARRAY_BUFFER);
-        glFlushMappedBufferRange(GL_ARRAY_BUFFER, offset, size);
-#include "Buffer.hpp"
-
-using namespace geode::prelude;
-
-Buffer::~Buffer() {
-    glDeleteBuffers(1, &id);
-    if (mappedData)
-        delete[] mappedData;
 }
 
 void Buffer::read(void* data, usize size, usize offset) {
@@ -103,8 +48,8 @@ void Buffer::write(void* data, usize size, usize offset) {
 void* Buffer::map(GLbitfield access) {
     if (mappedData) return nullptr;
 
+    bindAs(GL_ARRAY_BUFFER);
     if (shouldMap) {
-        bindAs(GL_ARRAY_BUFFER);
         mappedData = static_cast<u8*>(glMapBufferRange(GL_ARRAY_BUFFER, 0, size, access));
     } else {
         mappedData = new u8[size];
