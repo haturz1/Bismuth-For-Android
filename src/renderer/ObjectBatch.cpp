@@ -10,6 +10,10 @@
 #include <string>
 #include "../profiler.hpp"
 
+#if defined(__ANDROID__)
+#include <EGL/egl.h>
+#endif
+
 using namespace geode::prelude;
 
 #define QUAD_BL 0
@@ -244,6 +248,17 @@ void ObjectBatch::finishWriting() {
     restoreGLStates();
 }
 
+template <typename T>
+static T getGLProcAddress(const char* name) {
+#if defined(_WIN32)
+    return reinterpret_cast<T>(wglGetProcAddress(name));
+#elif defined(__ANDROID__) || defined(ANDROID)
+    return reinterpret_cast<T>(eglGetProcAddress(name));
+#else
+    return nullptr;
+#endif
+}
+
 typedef void (*PFNGLMULTIDRAWELEMENTSINDIRECTPROC)(GLenum mode, GLenum type, const void * indirect, GLsizei drawcount, GLsizei stride);
 static PFNGLMULTIDRAWELEMENTSINDIRECTPROC glMultiDrawElementsIndirect;
 typedef void (*PFNGLMULTIDRAWARRAYSINDIRECTPROC)(GLenum mode, const void * indirect, GLsizei drawcount, GLsizei stride);
@@ -261,14 +276,16 @@ void ObjectBatch::draw(const LayerKey& layer) {
     const auto& range = sortedBatch->workGroupRangePerLayerKey[layer];
 
     if (!glMultiDrawElementsIndirect)
-        glMultiDrawElementsIndirect = (PFNGLMULTIDRAWELEMENTSINDIRECTPROC)wglGetProcAddress("glMultiDrawElementsIndirect");
+        glMultiDrawElementsIndirect = getGLProcAddress<PFNGLMULTIDRAWELEMENTSINDIRECTPROC>("glMultiDrawElementsIndirect");
     if (!glMultiDrawArraysIndirect)
-        glMultiDrawArraysIndirect = (PFNGLMULTIDRAWARRAYSINDIRECTPROC)wglGetProcAddress("glMultiDrawArraysIndirect");
+        glMultiDrawArraysIndirect = getGLProcAddress<PFNGLMULTIDRAWARRAYSINDIRECTPROC>("glMultiDrawArraysIndirect");
 
     sortedBatch->bindBuffers();
     prepareCullingComputeShader();
     renderer.bindCullingComputeShaderBuffers();
+#if defined(GL_DRAW_INDIRECT_BUFFER)
     sortedBatch->drawCommandBuffer->bindAs(GL_DRAW_INDIRECT_BUFFER);
+#endif
     glBindVertexArray(vao);
     vertexBuffer->bindAsStorageBuffer(VERTEX_BUFFER_BINDING);
     // culledIndexBuffer->bindAs(GL_ELEMENT_ARRAY_BUFFER);
@@ -297,7 +314,7 @@ void ObjectBatch::predraw() {
     sortedBatch->bindBuffers();
 
     if (!glDispatchCompute)
-        glDispatchCompute = (PFNGLDISPATCHCOMPUTEPROC)wglGetProcAddress("glDispatchCompute");
+        glDispatchCompute = getGLProcAddress<PFNGLDISPATCHCOMPUTEPROC>("glDispatchCompute");
 
     glDispatchCompute(sortedBatch->workGroupCount, 1, 1);
 
@@ -340,8 +357,10 @@ static AttribTypeInfo getInfoOfAttributeTypeString(std::string type) {
 static void vertexAttribPointer(u32 id, const AttribTypeInfo& info, usize stride, usize offset) {
     if (info.openGlType == GL_FLOAT)
         glVertexAttribPointer(id, info.componentCount, info.openGlType, GL_FALSE, sizeof(ObjectVertex), (void*)offset);
+#if defined(GL_DOUBLE)
     else if (info.openGlType == GL_DOUBLE)
         glVertexAttribLPointer(id, info.componentCount, info.openGlType, sizeof(ObjectVertex), (void*)offset);
+#endif
     else
         glVertexAttribIPointer(id, info.componentCount, info.openGlType, sizeof(ObjectVertex), (void*)offset);
 }
