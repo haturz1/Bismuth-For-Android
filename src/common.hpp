@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Geode/cocos/cocoa/CCGeometry.h"
-#include "Geode/cocos/platform/win32/CCGL.h"
+#include "platform/GLPlatform.hpp"
 #include "ccTypes.h"
 #include "glm/fwd.hpp"
 #include <cstring>
