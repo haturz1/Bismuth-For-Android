@@ -5,9 +5,9 @@
 		"android": "2.2081"
 	},
 	"id": "iliashdz.bismuth",
-	"name": "Bismuth (experimental)",
+	"name": "Bismuth for Android (experimental)",
 	"version": "v0.1.0-alpha",
-	"developer": "IliasHDZ",
+	"developer": "haturz1, IliasHDZ",
 	"description": "Rendering optimization mod",
 	"dependencies": {
 		"geode.node-ids": ">=v1.20.0"
