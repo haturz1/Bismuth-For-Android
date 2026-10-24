@@ -1,6 +1,9 @@
 #pragma once
 
 #if defined(__ANDROID__)
+    #undef glBindVertexArray
+    #undef glDeleteVertexArrays
+    #undef glGenVertexArrays
     #include <GLES3/gl3.h>
     #include <GLES3/gl3ext.h>
 #elif defined(_WIN32)
