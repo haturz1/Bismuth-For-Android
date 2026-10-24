@@ -1,7 +1,8 @@
 #pragma once
 
 #if defined(__ANDROID__)
-    #include "Geode/cocos/platform/android/CCGL.h"
+    #include <GLES3/gl3.h>
+    #include <GLES3/gl3ext.h>
 #elif defined(_WIN32)
     #include "Geode/cocos/platform/win32/CCGL.h"
 #else
